@@ -1,0 +1,30 @@
+name: Import poster tarball
+
+on:
+  workflow_dispatch:
+    inputs:
+      bundle_url:
+        description: Public HTTPS URL to shuihu-108-posters.tar.gz
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and extract
+        run: |
+          curl -fL "${{ inputs.bundle_url }}" -o posters.tar.gz
+          mkdir -p assets/shuihu
+          tar xzf posters.tar.gz -C assets/shuihu
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/shuihu
+          git status
+          git commit -m "Import 108 Water Margin poster PNGs (720x1280)" || exit 0
+          git push
